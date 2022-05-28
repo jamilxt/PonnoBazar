@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "inventory-service")
 public interface InventoryFeignClient {
-    @GetMapping(path = "api/inventory/available/{product_code}/{quantity}")
+    @GetMapping(path = "api/v1/inventory/available/{product_code}/{quantity}")
     Boolean isStockAvailable(@PathVariable("product_code") String productCode, @PathVariable("quantity") Integer quantity);
 }

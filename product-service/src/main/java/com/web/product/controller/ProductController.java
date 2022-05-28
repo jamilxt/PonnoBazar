@@ -1,6 +1,7 @@
 package com.web.product.controller;
 
 import com.web.product.service.impl.ProductServiceImpl;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,30 +18,17 @@ import com.web.product.model.Product;
 import javax.validation.Valid;
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
-@RequestMapping(path = "api/products")
+@RequestMapping(path = "api/v1/products")
 public class ProductController {
 	
 	private final ProductServiceImpl productService;
 
-	@Autowired
-	public ProductController(ProductServiceImpl productService) {
-		this.productService = productService;
-	}
-
 	@PostMapping
-	public ResponseEntity<HttpStatus> createProduct(@Valid @RequestBody ProductDto productDto, BindingResult result) {
-		if (result.hasErrors()) {
-			if (productDto.getProductName() == null || productDto.getProductName().equals("")) {
-				throw new RuntimeException("Product name cannot be empty");
-			}
-			throw new RuntimeException("Internal server error!");
-		}
-		boolean productCreated = productService.createProduct(productDto);
-		if (productCreated) {
-			return ResponseEntity.ok(HttpStatus.CREATED);
-		}
-		return null;
+	public ResponseEntity<HttpStatus> createProduct(@Valid @RequestBody ProductDto productDto) {
+		productService.createProduct(productDto);
+		return ResponseEntity.ok(HttpStatus.CREATED);
 	}
 
     @GetMapping
@@ -54,20 +42,13 @@ public class ProductController {
 
 	@GetMapping("/{product_code}")
 	public ResponseEntity<Product> getProduct(@PathVariable("product_code") String productCode) {
-		Product getProduct = productService.getProduct(productCode);
-		if (getProduct != null) {
-			return ResponseEntity.ok(getProduct);
-		}
-		return null;
+		return ResponseEntity.ok(productService.getProduct(productCode));
 	}
 
 	@GetMapping("/exist/{product_code}")
 	public boolean checkProductExists(@PathVariable("product_code") String productCode) {
 		boolean checkProductExists = productService.checkProductExists(productCode);
-		if (checkProductExists) {
-			return true;
-		}
-		return false;
+		return checkProductExists;
 	}
 
 	@PutMapping("/{product_code}")

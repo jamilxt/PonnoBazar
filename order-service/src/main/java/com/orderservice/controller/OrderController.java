@@ -1,5 +1,6 @@
 package com.orderservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.orderservice.dto.OrderDto;
 import com.orderservice.dto.TxResponse;
 import com.orderservice.service.impl.OrderServiceImpl;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "api/order")
+@RequestMapping(path = "api/v1/order")
 public class OrderController {
 
     private final OrderServiceImpl orderService;
@@ -21,7 +22,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public TxResponse placeOrder(@RequestBody OrderDto orders) {
+    public TxResponse placeOrder(@RequestBody OrderDto orders) throws JsonProcessingException {
         TxResponse response = orderService.placeOrder(orders);
         return response;
     }

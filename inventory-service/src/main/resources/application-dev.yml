@@ -3,6 +3,8 @@ spring:
     username: inventory
     password: inventory
     url: jdbc:mysql://inventory_service_db:3306/inventory_service?createDatabaseIfNotExist=true
+  kafka:
+    bootstrap-servers: kafka:29092
   jpa:
     properties:
       dialect: org.hibernate.dialect.MySQL8Dialect

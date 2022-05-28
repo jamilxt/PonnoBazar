@@ -5,11 +5,10 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDto {
-    private List<OrderLineItems> orderLineItems;
+    private String productCode;
+    private Integer quantity;
 }

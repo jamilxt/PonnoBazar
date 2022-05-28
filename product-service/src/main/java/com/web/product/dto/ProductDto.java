@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -15,12 +15,12 @@ import javax.validation.constraints.Size;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document
 public class ProductDto {
 
 	@NotNull(message = "Product name can't empty")
 	@Size(min = 2, max = 30, message = "Product name can't be less than 2 characters")
 	private String productName;
 	private String productCode;
+	@Min(value = 1, message = "Unit price can't be less than 1")
 	private int unitPrice;
 }

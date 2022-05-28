@@ -24,13 +24,7 @@ import java.io.Serializable;
 public class Product implements Serializable {
 
 	@Id
-	@NotBlank(message = "Product name cannot be blank.")
-	@Min(value = 2, message = "Product name cannot be less than 2 characters")
-	@Max(value = 8, message = "Product name cannot be greater than 8 characters")
 	private String productCode;
-	@NotBlank(message = "Product name cannot be blank.")
-	@Min(value = 2, message = "Product name cannot be less than 2 characters")
-	@Max(value = 20, message = "Product name cannot be greater than 20 characters")
 	private String productName;
 	private String skuCode;
 	private int unitPrice;

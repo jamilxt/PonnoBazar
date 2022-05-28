@@ -37,11 +37,12 @@ services:
     ports:
       - "9090:9090"
     environment:
-      - MONGODB_URI=mongodb://product_service_db
+      - mongodb_uri=mongodb://product_service_db
     depends_on:
       - product_service_db
       - redis
       - eureka-service
+      - zipkins
     networks:
       - backend
   order_service:
@@ -57,6 +58,8 @@ services:
       - product_service
       - inventory_service
       - eureka-service
+      - kafka
+      - zipkins
     networks:
       - backend
   inventory_service:
@@ -71,6 +74,9 @@ services:
     depends_on:
       - inventory_service_db
       - eureka-service
+      - kafka
+      - product_service
+      - zipkins
     networks:
       - backend
   product_service_db:
@@ -100,6 +106,41 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - backend
+  zipkins:
+    image: openzipkin/zipkin
+    container_name: zipkins
+    ports:
+      - "9411:9411"
+    networks:
+      - backend
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+    networks:
+      - backend
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 300000000
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - backend
 networks:

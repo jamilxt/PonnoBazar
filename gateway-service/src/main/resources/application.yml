@@ -16,20 +16,20 @@ spring:
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/api/products/**
+            - Path=/api/v1/products/**
         - id: inventory-service
           uri: lb://inventory-service
           predicates:
-            - Path=/api/inventory/**
+            - Path=/api/v1/inventory/**
         - id: order-service
           uri: lb://order-service
           predicates:
-            - Path=/api/order/**
+            - Path=/api/v1/order/**
     config:
       uri: http://localhost:8888
   profiles:
     active: dev
   config:
-    import: 'configserver:'
+    import: optional:configserver:http://localhost:8888
 server:
   port: 8080

@@ -1,6 +1,8 @@
 package com.web.product.service.impl;
 
 import com.web.product.dto.ProductDto;
+import com.web.product.exception.InternalServerErrorException;
+import com.web.product.exception.NotFoundException;
 import com.web.product.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +44,8 @@ public class ProductServiceImpl implements ProductService {
 			if (saveProduct.getProductCode().equals(product.getProductCode())) {
 				return true;
 			}
-		} catch (Exception e) {
-			throw new RuntimeException("Can't create product");
+		} catch (InternalServerErrorException e) {
+			throw new InternalServerErrorException("Can't create product");
 		}
 		return false;
 	}
@@ -51,85 +53,57 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Cacheable("product")
 	public Product getProduct(String productCode) {
-		try {
-			Product product = productRepository.findByProductCode(productCode);
-			if (product != null && product.getIsActive()) {
-				return product;
-			}
-		} catch (NullPointerException e) {
-			throw new NullPointerException("Cannot find product!");
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Internal server error!");
+		Product product = productRepository.findByProductCode(productCode);
+		if (product != null && product.getIsActive()) {
+			return product;
 		}
-		return null;
+		throw new NotFoundException("Desired product not available.");
 	}
 
 	@Override
 	public boolean checkProductExists(String productCode) {
-		try {
-			Product product = getProduct(productCode);
-			if (product != null) {
-				return true;
-			}
-		} catch (NullPointerException e) {
-			throw new NullPointerException("Cannot find product!");
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Internal server error!");
+		Product product = getProduct(productCode);
+		if (product != null) {
+			return true;
 		}
-		return false;
+		throw new InternalServerErrorException("Can't retrieve product.");
 	}
 
 	@Override
 	@Cacheable("product")
 	public List<Product> getProducts(Pageable pageable) {
 		Page<Product> getPagedProducts = productRepository.findAll(pageable);
-		try {
-			if (getPagedProducts.hasContent()) {
-				List<Product> products = getPagedProducts.getContent()
-						.stream().filter(x -> x.getIsActive())
-						.collect(Collectors.toList());
-				return products;
-			}
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Cannot fetch product list");
+		if (getPagedProducts.hasContent()) {
+			List<Product> products = getPagedProducts.getContent()
+					.stream().filter(x -> x.getIsActive())
+					.collect(Collectors.toList());
+			return products;
 		}
-		return null;
+		throw new NotFoundException("Product doesn't exist.");
 	}
 
 	@Override
 	@CachePut(value = "product", key = "#product.productCode")
 	public boolean updateProduct(String productCode, Product product) {
-		try {
-			Product existingProduct = getProduct(productCode);
-			if (existingProduct != null) {
-				if (!product.getProductCode().isEmpty()) {
-					productRepository.save(product);
-					return true;
-				}
+		Product existingProduct = getProduct(productCode);
+		if (existingProduct != null) {
+			if (!product.getProductCode().isEmpty()) {
+				productRepository.save(product);
+				return true;
 			}
-		} catch (NullPointerException e) {
-			throw new NullPointerException("Cannot update product!");
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Internal server error!");
 		}
-		return false;
+		throw new InternalServerErrorException("Product can't update.");
 	}
 
 	@Override
 	@CacheEvict(value = "product", allEntries = true)
 	public boolean deleteProduct(String productCode) {
-		try {
-			Product existingProduct = getProduct(productCode);
-			if (existingProduct != null) {
-				existingProduct.setIsActive(false);
-				productRepository.save(existingProduct);
-				return true;
-			}
-		} catch (NullPointerException e) {
-			throw new NullPointerException("Cannot delete product!");
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Internal server error!");
+		Product existingProduct = getProduct(productCode);
+		if (existingProduct != null) {
+			existingProduct.setIsActive(false);
+			productRepository.save(existingProduct);
+			return true;
 		}
-		return false;
+		throw new InternalServerErrorException("Product can't delete.");
 	}
 }
